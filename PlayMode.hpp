@@ -5,6 +5,9 @@
 
 #include <glm/glm.hpp>
 
+#include <hb.h>
+#include <hb-ft.h>
+
 #include <vector>
 #include <deque>
 
@@ -44,5 +47,37 @@ struct PlayMode : Mode {
 	
 	//camera:
 	Scene::Camera *camera = nullptr;
+
+	void draw_text(std::string s);
+
+	GLuint texture{0}, sampler{0};
+  GLuint vbo{0}, vao{0};
+  GLuint vs{0}, fs{0}, program{0};
+	GLuint texUniform{0};
+
+  FT_Face ft_face;
+	FT_Library ft_library;
+
+	hb_font_t *hb_font;
+
+	const char *VERTEX_SHADER = ""
+        "#version 330\n"
+        "in vec4 position;\n"
+        "out vec2 texCoords;\n"
+        "void main(void) {\n"
+        "    gl_Position = vec4(position.xy, 0, 1);\n"
+        "    texCoords = position.zw;\n"
+        "}\n";
+
+
+	const char *FRAGMENT_SHADER = ""
+        "#version 330\n"
+        "uniform sampler2D tex;\n"
+        "in vec2 texCoords;\n"
+        "out vec4 fragColor;\n"
+				"const vec4 color = vec4(1, 1, 1, 1);\n"
+        "void main(void) {\n"
+        "    fragColor = vec4(1, 1, 1, texture(tex, texCoords).r) * color;\n"
+        "}\n";
 
 };
