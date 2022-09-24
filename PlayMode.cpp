@@ -80,8 +80,9 @@ void PlayMode::draw_text(std::string s, glm::uvec2 const &drawable_size) {
   		if ( error )
     		continue;
 
+
       float x_position = current_x + pos[i].x_offset / (64.f * drawable_size.x);
-      float y_position = current_y + pos[i].y_offset / (64.f * drawable_size.y);
+      float y_position = current_y + ((pos[i].y_offset / 64.f) - ((ft_face->bbox.yMax - ft_face->bbox.yMin) - ft_face->glyph->metrics.horiBearingY) / 64.f) / (drawable_size.y);
 
 			FT_Bitmap *bm = &ft_face->glyph->bitmap;
 			// FT_PIXEL_MODE_GRAY
@@ -100,7 +101,7 @@ void PlayMode::draw_text(std::string s, glm::uvec2 const &drawable_size) {
     	);
 
       const float w = bm->width / (float)drawable_size.x;
-      const float h = bm->rows / (float)drawable_size.y;
+      const float h = bm->rows/ (float)drawable_size.y;
 
       struct {
       	float x, y, s, t;
@@ -188,10 +189,9 @@ PlayMode::PlayMode() : scene(*hexapod_scene) {
 
   // Get shader uniforms
   glUseProgram(program);
-  glBindAttribLocation(program, 0, "in_Position");
   texUniform = glGetUniformLocation(program, "tex");
 
-	#define FONT_SIZE 36
+	#define FONT_SIZE 72
 
 	const char *fontfile = "/Users/sacha/Desktop/15666/harfbuzz-tutorial/Roboto-Regular.ttf";
 
@@ -384,7 +384,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glUseProgram(program);
   glUniform1i(texUniform, 0);
-	draw_text("Hello World", drawable_size);
+	draw_text("Hello World, my name is Sacha! I am the guy. abcdABCD", drawable_size);
 
 	GL_ERRORS();
 }
