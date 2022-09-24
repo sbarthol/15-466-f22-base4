@@ -40,10 +40,17 @@ Load< Sound::Sample > dusty_floor_sample(LoadTagDefault, []() -> Sound::Sample c
 	return new Sound::Sample(data_path("dusty-floor.opus"));
 });
 
+void PlayMode::draw_text_lines(std::vector<std::string> lines, glm::uvec2 const &drawable_size, float x, float y) {
+	for( size_t i=0;i<lines.size();i++) {
+		draw_text_line(lines[lines.size()-i-1],drawable_size,x,y);
+		y += ft_face->size->metrics.height / (64.f * (float)drawable_size.y);
+	}
+}
+
 // https://gedge.ca/blog/2013-12-08-opengl-text-rendering-with-freetype
 // https://www.freetype.org/freetype2/docs/tutorial/step1.html
 // https://github.com/harfbuzz/harfbuzz-tutorial/blob/master/hello-harfbuzz-freetype.c
-void PlayMode::draw_text(std::string s, glm::uvec2 const &drawable_size) {
+void PlayMode::draw_text_line(std::string s, glm::uvec2 const &drawable_size, float current_x, float current_y) {
 
   const char *text = s.c_str();
 
@@ -62,8 +69,6 @@ void PlayMode::draw_text(std::string s, glm::uvec2 const &drawable_size) {
 
   /* And converted to absolute positions. */
   {
-    double current_x = 0;
-    double current_y = 0;
 		glPixelStorei(GL_UNPACK_ALIGNMENT, 1); 
 
     for (unsigned int i = 0; i < len; i++)
@@ -384,7 +389,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glUseProgram(program);
   glUniform1i(texUniform, 0);
-	draw_text("Hello World, my name is Sacha! I am the guy. abcdABCD", drawable_size);
+	draw_text_lines({"On a lazy saturday afternoon", "I went to school", "and ate an apple"},drawable_size,-1.0,-0.95);
 
 	GL_ERRORS();
 }

@@ -48,7 +48,8 @@ struct PlayMode : Mode {
 	//camera:
 	Scene::Camera *camera = nullptr;
 
-	void draw_text(std::string s, glm::uvec2 const &drawable_size);
+	void draw_text_line(std::string s, glm::uvec2 const &drawable_size, float x, float y);
+	void draw_text_lines(std::vector<std::string> lines, glm::uvec2 const &drawable_size, float x, float y);
 
 	GLuint texture{0}, sampler{0};
   GLuint vbo{0}, vao{0};
