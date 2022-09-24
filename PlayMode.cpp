@@ -40,7 +40,10 @@ Load< Sound::Sample > dusty_floor_sample(LoadTagDefault, []() -> Sound::Sample c
 	return new Sound::Sample(data_path("dusty-floor.opus"));
 });
 
-void PlayMode::draw_text(std::string s) {
+// https://gedge.ca/blog/2013-12-08-opengl-text-rendering-with-freetype
+// https://www.freetype.org/freetype2/docs/tutorial/step1.html
+// https://github.com/harfbuzz/harfbuzz-tutorial/blob/master/hello-harfbuzz-freetype.c
+void PlayMode::draw_text(std::string s, glm::uvec2 const &drawable_size) {
 
   const char *text = s.c_str();
 
@@ -77,8 +80,8 @@ void PlayMode::draw_text(std::string s) {
   		if ( error )
     		continue;
 
-      float x_position = current_x + pos[i].x_offset / 64.;
-      float y_position = current_y + pos[i].y_offset / 64.;
+      float x_position = current_x + pos[i].x_offset / (64.f * drawable_size.x);
+      float y_position = current_y + pos[i].y_offset / (64.f * drawable_size.y);
 
 			FT_Bitmap *bm = &ft_face->glyph->bitmap;
 			// FT_PIXEL_MODE_GRAY
@@ -96,8 +99,8 @@ void PlayMode::draw_text(std::string s) {
         ft_face->glyph->bitmap.buffer
     	);
 
-      const float w = bm->width;
-      const float h = bm->rows;
+      const float w = bm->width / (float)drawable_size.x;
+      const float h = bm->rows / (float)drawable_size.y;
 
       struct {
       	float x, y, s, t;
@@ -114,8 +117,11 @@ void PlayMode::draw_text(std::string s) {
       glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
-      current_x += pos[i].x_advance / 64.;
-      current_y += pos[i].y_advance / 64.;
+      current_x += pos[i].x_advance / (64.f * drawable_size.x);
+      current_y += pos[i].y_advance / (64.f * drawable_size.y);
+
+			assert(current_x <= 1.0);
+			assert(current_y <= 1.0);
     }
   }
 
@@ -378,7 +384,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glUseProgram(program);
   glUniform1i(texUniform, 0);
-	draw_text("Hello World");
+	draw_text("Hello World", drawable_size);
 
 	GL_ERRORS();
 }
