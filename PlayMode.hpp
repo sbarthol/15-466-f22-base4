@@ -26,10 +26,11 @@ struct PlayMode : Mode {
 	struct Button {
 		uint8_t downs = 0;
 		uint8_t pressed = 0;
-	} left, right, down, up;
+	} a, b, c;
 
 	void draw_text_line(std::string s, glm::uvec2 const &drawable_size, float x, float y);
 	void draw_text_lines(glm::uvec2 const &drawable_size, float x, float y);
+	void load_lines_from_file(std::string filename);
 
 	GLuint texture{0}, sampler{0};
   GLuint vbo{0}, vao{0};
@@ -39,7 +40,11 @@ struct PlayMode : Mode {
 	size_t letter_counter{0};
 	std::vector<std::string> lines;
 	float current_elapsed = 0.0;
-	float max_elapsed = 0.05;
+	float max_elapsed = 0.03;
+
+	size_t current_level = 0;
+	std::vector<std::string> levels{"../scenes/intro", "../scenes/level_1", "../scenes/finish"};
+	bool intermezzo = false;
 
   FT_Face ft_face;
 	FT_Library ft_library;

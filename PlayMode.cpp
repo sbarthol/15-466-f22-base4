@@ -9,8 +9,17 @@
 #include "data_path.hpp"
 
 #include <glm/gtc/type_ptr.hpp>
+#include <fstream>
 
 #include <random>
+
+void PlayMode::load_lines_from_file(std::string filename) {
+	lines.clear();
+  std::ifstream input(filename);
+  for (std::string line; getline(input, line);) {
+		lines.push_back(line);
+  }
+}
 
 void PlayMode::draw_text_lines(glm::uvec2 const &drawable_size, float x, float y) {
 	size_t counter = 0;
@@ -155,7 +164,7 @@ PlayMode::PlayMode() {
   glUseProgram(program);
   texUniform = glGetUniformLocation(program, "tex");
 
-	#define FONT_SIZE 200
+	#define FONT_SIZE 120
 
 	// https://www.1001fonts.com/risque-font.html
 	std::string fontfile = data_path("../scenes/Risque-Regular.ttf");
@@ -173,7 +182,10 @@ PlayMode::PlayMode() {
   /* Create hb-ft font. */
   hb_font = hb_ft_font_create (ft_face, NULL);
 
-	lines = {"On a lazy saturday afternoon", "I went to school", "and ate an apple"};
+	current_level = 0;
+	current_elapsed = 0.f;
+	intermezzo = false;
+	load_lines_from_file(data_path(levels[current_level]));
 }
 
 PlayMode::~PlayMode() {
@@ -185,37 +197,19 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 
 	if (evt.type == SDL_KEYDOWN) {
 		if (evt.key.keysym.sym == SDLK_a) {
-			left.downs += 1;
-			left.pressed = true;
+			a.downs += 1;
+			a.pressed = true;
 			return true;
-		} else if (evt.key.keysym.sym == SDLK_d) {
-			right.downs += 1;
-			right.pressed = true;
+		} else if (evt.key.keysym.sym == SDLK_b) {
+			b.downs += 1;
+			b.pressed = true;
 			return true;
-		} else if (evt.key.keysym.sym == SDLK_w) {
-			up.downs += 1;
-			up.pressed = true;
+		} else if (evt.key.keysym.sym == SDLK_c) {
+			c.downs += 1;
+			c.pressed = true;
 			return true;
-		} else if (evt.key.keysym.sym == SDLK_s) {
-			down.downs += 1;
-			down.pressed = true;
-			return true;
-		}
-	} else if (evt.type == SDL_KEYUP) {
-		if (evt.key.keysym.sym == SDLK_a) {
-			left.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_d) {
-			right.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_w) {
-			up.pressed = false;
-			return true;
-		} else if (evt.key.keysym.sym == SDLK_s) {
-			down.pressed = false;
-			return true;
-		}
-	} 
+		} 
+	}
 
 	return false;
 }
@@ -228,11 +222,28 @@ void PlayMode::update(float elapsed) {
 		current_elapsed = 0.0;
 	}
 
+	if(a.downs || b.downs || c.downs) {
+		if(current_level > 0 && current_level + 1 < levels.size() && !intermezzo) {
+			current_elapsed = 0.f;
+			letter_counter = 0;
+			std::string suffix = a.downs ? "_a" : b.downs ? "_b" : "_c";
+			printf("loading %s\n", data_path(levels[current_level] + suffix).c_str());
+			load_lines_from_file(data_path(levels[current_level] + suffix));
+			intermezzo = true;
+		} else if(current_level + 1 < levels.size()) {
+			current_level++;
+			letter_counter = 0;
+			current_elapsed = 0.0;
+			printf("loading %s\n", data_path(levels[current_level]).c_str());
+			load_lines_from_file(data_path(levels[current_level]));
+			intermezzo = false;
+		}
+	}
+
 	//reset button press counters:
-	left.downs = 0;
-	right.downs = 0;
-	up.downs = 0;
-	down.downs = 0;
+	a.downs = 0;
+	b.downs = 0;
+	c.downs = 0;
 }
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
@@ -254,7 +265,7 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
   glUseProgram(program);
   glUniform1i(texUniform, 0);
 
-	draw_text_lines(drawable_size,-0.8,0.0);
+	draw_text_lines(drawable_size,-0.8,0.8);
 
 	GL_ERRORS();
 }
