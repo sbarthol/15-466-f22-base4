@@ -227,14 +227,12 @@ void PlayMode::update(float elapsed) {
 			current_elapsed = 0.f;
 			letter_counter = 0;
 			std::string suffix = a.downs ? "_a" : b.downs ? "_b" : "_c";
-			printf("loading %s\n", data_path(levels[current_level] + suffix).c_str());
 			load_lines_from_file(data_path(levels[current_level] + suffix));
 			intermezzo = true;
 		} else if(current_level + 1 < levels.size()) {
 			current_level++;
 			letter_counter = 0;
 			current_elapsed = 0.0;
-			printf("loading %s\n", data_path(levels[current_level]).c_str());
 			load_lines_from_file(data_path(levels[current_level]));
 			intermezzo = false;
 		}

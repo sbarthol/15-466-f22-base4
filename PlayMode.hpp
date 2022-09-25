@@ -43,7 +43,7 @@ struct PlayMode : Mode {
 	float max_elapsed = 0.03;
 
 	size_t current_level = 0;
-	std::vector<std::string> levels{"../scenes/intro", "../scenes/level_1", "../scenes/finish"};
+	std::vector<std::string> levels{"../scenes/intro", "../scenes/level_1", "../scenes/level_2", "../scenes/level_3", "../scenes/finish"};
 	bool intermezzo = false;
 
   FT_Face ft_face;
