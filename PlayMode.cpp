@@ -158,7 +158,7 @@ PlayMode::PlayMode() {
   glDisable(GL_CULL_FACE);
   glDisable(GL_DEPTH_TEST);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-  glClearColor(0.1, 0.2, 0.4, 0);
+  glClearColor(0, 0, 0, 1);
 
   // Get shader uniforms
   glUseProgram(program);
