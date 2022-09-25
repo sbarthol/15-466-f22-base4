@@ -12,10 +12,19 @@
 
 #include <random>
 
-void PlayMode::draw_text_lines(std::vector<std::string> lines, glm::uvec2 const &drawable_size, float x, float y) {
+void PlayMode::draw_text_lines(glm::uvec2 const &drawable_size, float x, float y) {
+	size_t counter = 0;
 	for( size_t i=0;i<lines.size();i++) {
-		draw_text_line(lines[lines.size()-i-1],drawable_size,x,y);
-		y += ft_face->size->metrics.height / (64.f * (float)drawable_size.y);
+		std::string line = lines[i];
+		if (counter + line.size() <= letter_counter) {
+			counter += line.size();
+			draw_text_line(line,drawable_size,x,y);
+		} else if (counter < letter_counter) {
+			draw_text_line(line.substr(0,letter_counter - counter),drawable_size,x,y);
+			counter = letter_counter;
+		}
+		
+		y -= ft_face->size->metrics.height / (64.f * (float)drawable_size.y);
 	}
 }
 
@@ -58,7 +67,7 @@ void PlayMode::draw_text_line(std::string s, glm::uvec2 const &drawable_size, fl
     		continue;
 
 
-      float x_position = current_x + pos[i].x_offset / (64.f * drawable_size.x);
+      float x_position = current_x + (pos[i].x_offset + 400 * 64.f) / (64.f * drawable_size.x);
       float y_position = current_y + ((pos[i].y_offset / 64.f) - ((ft_face->bbox.yMax - ft_face->bbox.yMin) - ft_face->glyph->metrics.horiBearingY) / 64.f) / (drawable_size.y);
 
 			FT_Bitmap *bm = &ft_face->glyph->bitmap;
@@ -95,7 +104,7 @@ void PlayMode::draw_text_line(std::string s, glm::uvec2 const &drawable_size, fl
       glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
       glDrawArrays(GL_TRIANGLES, 0, 6);
 
-      current_x += pos[i].x_advance / (64.f * drawable_size.x);
+      current_x += (pos[i].x_advance) / (64.f * drawable_size.x);
       current_y += pos[i].y_advance / (64.f * drawable_size.y);
 
 			assert(current_x <= 1.0);
@@ -146,22 +155,25 @@ PlayMode::PlayMode() {
   glUseProgram(program);
   texUniform = glGetUniformLocation(program, "tex");
 
-	#define FONT_SIZE 72
+	#define FONT_SIZE 200
 
-	const char *fontfile = "/Users/sacha/Desktop/15666/harfbuzz-tutorial/Roboto-Regular.ttf";
+	// https://www.1001fonts.com/risque-font.html
+	std::string fontfile = data_path("../scenes/Risque-Regular.ttf");
 
 	/* Initialize FreeType and create FreeType font face. */
   FT_Error ft_error;
 
   if ((ft_error = FT_Init_FreeType (&ft_library)))
     abort();
-  if ((ft_error = FT_New_Face (ft_library, fontfile, 0, &ft_face)))
+  if ((ft_error = FT_New_Face (ft_library, fontfile.c_str(), 0, &ft_face)))
     abort();
   if ((ft_error = FT_Set_Char_Size (ft_face, FONT_SIZE*64, FONT_SIZE*64, 0, 0)))
     abort();
 
   /* Create hb-ft font. */
   hb_font = hb_ft_font_create (ft_face, NULL);
+
+	lines = {"On a lazy saturday afternoon", "I went to school", "and ate an apple"};
 }
 
 PlayMode::~PlayMode() {
@@ -210,6 +222,11 @@ bool PlayMode::handle_event(SDL_Event const &evt, glm::uvec2 const &window_size)
 
 void PlayMode::update(float elapsed) {
 
+	current_elapsed += elapsed;
+	if(current_elapsed >= max_elapsed) {
+		letter_counter++;
+		current_elapsed = 0.0;
+	}
 
 	//reset button press counters:
 	left.downs = 0;
@@ -220,35 +237,12 @@ void PlayMode::update(float elapsed) {
 
 void PlayMode::draw(glm::uvec2 const &drawable_size) {
 	
-
 	glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
 	glClearDepth(1.0f); //1.0 is actually the default value to clear the depth buffer to, but FYI you can change it.
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LESS); //this is the default depth comparison function, but FYI you can change it.
-
-	{ //use DrawLines to overlay some text:
-		glDisable(GL_DEPTH_TEST);
-		float aspect = float(drawable_size.x) / float(drawable_size.y);
-		DrawLines lines(glm::mat4(
-			1.0f / aspect, 0.0f, 0.0f, 0.0f,
-			0.0f, 1.0f, 0.0f, 0.0f,
-			0.0f, 0.0f, 1.0f, 0.0f,
-			0.0f, 0.0f, 0.0f, 1.0f
-		));
-
-		constexpr float H = 0.09f;
-		lines.draw_text("Mouse motion rotates camera; WASD moves; escape ungrabs mouse",
-			glm::vec3(-aspect + 0.1f * H, -1.0 + 0.1f * H, 0.0),
-			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
-			glm::u8vec4(0x00, 0x00, 0x00, 0x00));
-		float ofs = 2.0f / drawable_size.y;
-		lines.draw_text("Mouse motion rotates camera; WASD moves; escape ungrabs mouse",
-			glm::vec3(-aspect + 0.1f * H + ofs, -1.0 + + 0.1f * H + ofs, 0.0),
-			glm::vec3(H, 0.0f, 0.0f), glm::vec3(0.0f, H, 0.0f),
-			glm::u8vec4(0xff, 0xff, 0xff, 0x00));
-	}
 
 	// Bind stuff
   glActiveTexture(GL_TEXTURE0);
@@ -259,7 +253,8 @@ void PlayMode::draw(glm::uvec2 const &drawable_size) {
   glBindBuffer(GL_ARRAY_BUFFER, vbo);
   glUseProgram(program);
   glUniform1i(texUniform, 0);
-	draw_text_lines({"On a lazy saturday afternoon", "I went to school", "and ate an apple"},drawable_size,-1.0,-0.95);
+
+	draw_text_lines(drawable_size,-0.8,0.0);
 
 	GL_ERRORS();
 }

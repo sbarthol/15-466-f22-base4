@@ -29,12 +29,17 @@ struct PlayMode : Mode {
 	} left, right, down, up;
 
 	void draw_text_line(std::string s, glm::uvec2 const &drawable_size, float x, float y);
-	void draw_text_lines(std::vector<std::string> lines, glm::uvec2 const &drawable_size, float x, float y);
+	void draw_text_lines(glm::uvec2 const &drawable_size, float x, float y);
 
 	GLuint texture{0}, sampler{0};
   GLuint vbo{0}, vao{0};
   GLuint vs{0}, fs{0}, program{0};
 	GLuint texUniform{0};
+
+	size_t letter_counter{0};
+	std::vector<std::string> lines;
+	float current_elapsed = 0.0;
+	float max_elapsed = 0.05;
 
   FT_Face ft_face;
 	FT_Library ft_library;
@@ -56,7 +61,7 @@ struct PlayMode : Mode {
         "uniform sampler2D tex;\n"
         "in vec2 texCoords;\n"
         "out vec4 fragColor;\n"
-				"const vec4 color = vec4(1, 1, 1, 1);\n"
+				"const vec4 color = vec4(0.388, 0.765, 0.196, 1);\n"
         "void main(void) {\n"
         "    fragColor = vec4(1, 1, 1, texture(tex, texCoords).r) * color;\n"
         "}\n";
