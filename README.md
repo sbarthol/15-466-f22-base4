@@ -1,12 +1,21 @@
-# (TODO: your game's title)
+# Which door is safe
 
-Author: (TODO: your name)
+Author: Sacha Bartholme
 
-Design: (TODO: In two sentences or fewer, describe what is new and interesting about your game.)
+Design:
+On a cold Halloween night you wake up in the basement of an abandoned mansion. 
+In front of you are three doors, one of which will lead you to the exit.
 
-Text Drawing: (TODO: how does the text drawing in this game work? Is text precomputed? Rendered at runtime? What files or utilities are involved?)
+Text Drawing: 
+The text is rendered at runtime using FreeType, HarffBuzz and OpenGL shaders.
+The assets of this game are simply text files representing the different levels
+and a TrueType font file used for the Halloween styled text. There is a nice
+effect which makes the text appear letter by letter instead of all at once.
 
-Choices: (TODO: how does the game store choices and narrative? How are they authored? Anything nifty you want to point out?)
+Choices: 
+The game stores narratives as text files. At each level, the user makes a choice
+by pressing one of three buttons. 2 buttons will end the game immediately and
+1 button makes you progress to the next stage.
 
 Screen Shot:
 
@@ -14,9 +23,14 @@ Screen Shot:
 
 How To Play:
 
-(TODO: describe the controls and (if needed) goals/strategy.)
+Press A to continue or either A, B or C to make a choice.
 
-Sources: (TODO: list a source URL for any assets you did not create yourself. Make sure you have a license for the asset.)
+Sources: 
+- https://www.riddlesnow.com/riddles/escape-room-riddles/
+- https://gedge.ca/blog/2013-12-08-opengl-text-rendering-with-freetype
+- https://www.freetype.org/freetype2/docs/tutorial/step1.html
+- https://github.com/harfbuzz/harfbuzz-tutorial/blob/master/hello-harfbuzz-freetype.c
+- https://www.1001fonts.com/risque-font.html
 
 This game was built with [NEST](NEST.md).
 
