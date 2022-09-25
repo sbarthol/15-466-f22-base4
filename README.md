@@ -22,8 +22,8 @@ Screen Shot:
 ![Screen Shot](screenshot.png)
 
 How To Play:
-
 Press A to continue or either A, B or C to make a choice.
+Set the window to fullscreen for maximum chills!
 
 Sources: 
 - https://www.riddlesnow.com/riddles/escape-room-riddles/
